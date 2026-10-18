@@ -1,0 +1,21 @@
+Sudhakar Bhambade — Portfolio
+Build stamp: FINAL-2026-10-18-R3
+
+R3 change: tsconfig.json now only type-checks files inside src/.
+Stale leftover files anywhere else in the repository can no longer
+break the Vercel build.
+
+Repo contents should be exactly:
+  src/            (app, components, db, lib, proxy.ts)
+  public/         (images/profile.jpg)
+  BUILD_INFO.txt
+  package.json
+  package-lock.json
+  next.config.ts
+  tsconfig.json
+  postcss.config.mjs
+  drizzle.config.json
+  eslint.config.mjs
+  README.md
+
+Never upload: node_modules, .next, .env

@@ -1,0 +1,410 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0c0c10;
+  --color-ink-2: #16161d;
+  --color-ink-3: #23232d;
+  --color-bone: #f4f2ec;
+  --color-bone-2: #e9e6dd;
+  --color-paper: #ffffff;
+  --color-line: #dedacd;
+  --color-line-soft: #eceae2;
+  --color-vermilion: #ff4a1c;
+  --color-vermilion-soft: #ffe6de;
+  --color-violet: #7a5cff;
+  --color-violet-soft: #e8e2ff;
+  --color-acid: #d7f24b;
+  --color-azure: #3ba9ff;
+  --color-snow: #f5f5f7;
+  --color-void: #000000;
+  --color-mute: #86868b;
+
+  --font-display: var(--font-instrument), "Times New Roman", Georgia, serif;
+  --font-sans: var(--font-grotesk), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-soft: 0 1px 2px rgba(12, 12, 16, 0.04), 0 10px 34px -14px rgba(12, 12, 16, 0.22);
+  --shadow-lift: 0 2px 6px rgba(12, 12, 16, 0.05), 0 30px 70px -24px rgba(12, 12, 16, 0.32);
+  --shadow-glow: 0 20px 60px -24px rgba(255, 74, 28, 0.55);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: var(--color-vermilion);
+    color: #fff;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 88rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* micro label — the mono eyebrow used across the studio */
+  .micro {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .rule {
+    height: 1px;
+    width: 100%;
+    background-color: var(--color-line);
+  }
+
+  .card-surface {
+    background-color: var(--color-paper);
+    border: 1px solid var(--color-line-soft);
+    border-radius: 1.5rem;
+  }
+
+  .glass {
+    background: color-mix(in oklab, white 8%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .stroke-text {
+    color: transparent;
+    -webkit-text-stroke: 1.2px currentColor;
+  }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+  }
+
+  /* Card whose hover border + glow follow its own accent colour.
+     Set the colour per card with style={{ "--accent": "#ff9a3c" }}. */
+  .accent-card {
+    --accent: var(--color-vermilion);
+    transition:
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.4s ease,
+      box-shadow 0.5s ease,
+      background-color 0.4s ease;
+  }
+
+  .accent-card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+      0 24px 70px -28px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 110%, 0) rotate(5deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 34s linear infinite;
+}
+
+.animate-marquee-fast {
+  animation: marquee 18s linear infinite;
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(8%, 6%, 0) scale(1.15);
+  }
+  66% {
+    transform: translate3d(-4%, 10%, 0) scale(0.95);
+  }
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+.animate-aurora {
+  animation: aurora 18s ease-in-out infinite;
+}
+
+@keyframes aurora-2 {
+  0% {
+    transform: translate3d(6%, 4%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-8%, -6%, 0) scale(0.9);
+  }
+  100% {
+    transform: translate3d(6%, 4%, 0) scale(1.1);
+  }
+}
+
+.animate-aurora-2 {
+  animation: aurora-2 22s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 26s linear infinite;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+.animate-float {
+  animation: float-y 7s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+svg .animate-pulse-ring,
+svg .animate-spin-slow,
+svg .animate-float {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 220% 220%;
+  animation: gradient-pan 8s ease infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bone-2);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+.scroll-x {
+  scrollbar-width: none;
+}
+
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-fast,
+  .animate-aurora,
+  .animate-aurora-2,
+  .animate-spin-slow,
+  .animate-float,
+  .animate-pulse-ring,
+  .animate-gradient {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.dash-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dash-scroll::-webkit-scrollbar-thumb {
+  background: #d8d2c4;
+  border-radius: 999px;
+}
+
+.dash-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* ───────── Dark, Apple-style public site scope ───────── */
+.dark-site {
+  --color-bone: #000000;
+  --color-bone-2: #1c1c1e;
+  --color-paper: #101012;
+  --color-line: #2c2c2e;
+  --color-line-soft: #1f1f21;
+  --color-ink: #f5f5f7;
+  --color-ink-2: #e8e8ea;
+  --color-ink-3: #3a3a3c;
+  background-color: #000;
+  color: #f5f5f7;
+  color-scheme: dark;
+}
+
+body:has(.dark-site) {
+  background-color: #000;
+}
+
+@keyframes box-sway {
+  0%,
+  100% {
+    transform: rotateX(-16deg) rotateY(-36deg);
+  }
+  50% {
+    transform: rotateX(-16deg) rotateY(-12deg);
+  }
+}
+
+.animate-box-sway {
+  animation: box-sway 7s ease-in-out infinite;
+}
+
+@keyframes check-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-10px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake-x 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-box-sway,
+  .animate-shake {
+    animation: none;
+  }
+}
