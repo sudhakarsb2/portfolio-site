@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icons";
 import { PdfPages } from "@/components/site/pdf-pages";
 import { Reveal } from "@/components/ui/reveal";
 import { getAdjacentProjects, getProjectBySlug } from "@/lib/data";
-import { displayImage, mediaKind, youtubeId } from "@/lib/utils";
+import { displayImage, mediaKind, vimeoId, youtubeId } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -140,6 +140,37 @@ export default async function ProjectPage({ params }: Params) {
                         className="h-full w-full"
                       />
                     </div>
+                  ) : kind === "vimeo" ? (
+                    <div className="aspect-video overflow-hidden rounded-[28px] border border-white/10 bg-[#101012]">
+                      <iframe
+                        src={`https://player.vimeo.com/video/${vimeoId(url)}?dnt=1`}
+                        title={`${project.title} — video`}
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        className="h-full w-full"
+                      />
+                    </div>
+                  ) : kind === "link" ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group flex items-center gap-5 rounded-[28px] border border-white/10 bg-[#101012] p-6 transition-colors hover:border-white/30"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-azure text-white">
+                        <Icon name="external" className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-white">View linked content</span>
+                        <span className="mt-1 block truncate text-xs text-white/50">
+                          {new URL(url).hostname.replace("www.", "")} — opens in a new tab
+                        </span>
+                      </span>
+                      <Icon
+                        name="arrow-up-right"
+                        className="ml-auto h-4 w-4 shrink-0 text-white/40 transition-transform group-hover:rotate-45"
+                      />
+                    </a>
                   ) : kind === "video" ? (
                     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#101012]">
                       <video
