@@ -106,7 +106,16 @@ export function truncate(value: string, length = 120): string {
   return `${value.slice(0, length).trimEnd()}…`;
 }
 
-export type MediaKind = "image" | "video" | "pdf" | "youtube";
+export type MediaKind = "image" | "video" | "pdf" | "youtube" | "vimeo" | "link";
+
+/** Extracts the video id from a Vimeo URL. */
+export function vimeoId(url: string): string | null {
+  const match = url.match(/vimeo\.com\/(?:video\/)?(\d{6,12})/);
+  return match ? match[1] : null;
+}
+
+/** Hosts that should render as a "visit link" card, not as media. */
+const LINK_HOSTS = /(drive\.google\.com|docs\.google\.com|dropbox\.com|wetransfer\.com|behance\.net|issuu\.com)/i;
 
 /** Extracts the video id from any common YouTube URL shape. */
 export function youtubeId(url: string): string | null {
@@ -130,6 +139,8 @@ export function displayImage(url: string): string {
 /** Infers how a gallery URL should be rendered. */
 export function mediaKind(url: string): MediaKind {
   if (youtubeId(url)) return "youtube";
+  if (vimeoId(url)) return "vimeo";
+  if (LINK_HOSTS.test(url)) return "link";
   const clean = url.split("?")[0].toLowerCase();
   if (/\.(mp4|webm|mov)$/.test(clean)) return "video";
   if (/\.pdf$/.test(clean)) return "pdf";
