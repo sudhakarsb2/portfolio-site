@@ -61,6 +61,23 @@ export function ProjectForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [galleryUrl, setGalleryUrl] = useState("");
+
+  function addGalleryUrl() {
+    const url = galleryUrl.trim();
+    if (!url) return;
+    if (!/^https?:\/\/.+/i.test(url)) {
+      push("Please paste a full address starting with https://", "error");
+      return;
+    }
+    if (values.gallery.includes(url)) {
+      push("That URL is already in the gallery", "error");
+      return;
+    }
+    set("gallery", [...values.gallery, url]);
+    setGalleryUrl("");
+    push("URL added to the gallery — save to publish it");
+  }
 
   const set = <K extends keyof ProjectFormValues>(key: K, value: ProjectFormValues[K]) =>
     setValues((current) => ({ ...current, [key]: value }));
@@ -243,22 +260,24 @@ export function ProjectForm({
                 </button>
               ) : null}
             </div>
-            <Field label="Gallery images" hint="Images, PDFs, videos — or paste YouTube links (saves storage; the thumbnail and player come from YouTube).">
-              <Textarea
-                rows={5}
-                value={values.gallery.join("\n")}
-                onChange={(event) =>
-                  set(
-                    "gallery",
-                    event.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean),
-                  )
-                }
-                placeholder={"https://…/01.jpg\nhttps://…/02.jpg"}
-              />
-              <div className="mt-3 space-y-3">
+            <Field label="Gallery" hint="Upload files, or add URLs: YouTube, Vimeo, Drive/Dropbox links, or any direct image/video/PDF address.">
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    value={galleryUrl}
+                    onChange={(event) => setGalleryUrl(event.target.value)}
+                    placeholder="Paste a URL — YouTube, Vimeo, Drive, or a direct file link"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addGalleryUrl();
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addGalleryUrl}>
+                    Add URL
+                  </Button>
+                </div>
                 <ImageUploader
                   kind="media"
                   label="Upload image, PDF or video"
@@ -268,27 +287,41 @@ export function ProjectForm({
                   }}
                 />
                 {values.gallery.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {values.gallery.map((url) => (
-                      <div key={url} className="group relative h-16 w-16 overflow-hidden rounded-lg border border-line bg-bone-2">
-                        {mediaKind(url) === "image" || mediaKind(url) === "youtube" ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={displayImage(url)} alt="Gallery" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase text-ink/60">
-                            {mediaKind(url) === "video" ? "Video" : "PDF"}
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          aria-label="Remove image"
-                          onClick={() => set("gallery", values.gallery.filter((item) => item !== url))}
-                          className="absolute inset-0 hidden items-center justify-center bg-ink/60 text-[10px] font-semibold text-white group-hover:flex"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                  <div className="flex flex-wrap gap-3">
+                    {values.gallery.map((url) => {
+                      const kind = mediaKind(url);
+                      const isUploaded = url.startsWith("/api/media/");
+                      return (
+                        <div key={url} className="flex w-16 flex-col items-center gap-1">
+                          <div className="group relative h-16 w-16 overflow-hidden rounded-lg border border-line bg-bone-2">
+                            {kind === "image" || kind === "youtube" ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={displayImage(url)} alt="Gallery" className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase text-ink/60">
+                                {kind === "video" ? "Video" : kind === "vimeo" ? "Vimeo" : kind === "link" ? "Link" : "PDF"}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              aria-label="Remove"
+                              onClick={() => set("gallery", values.gallery.filter((item) => item !== url))}
+                              className="absolute inset-0 hidden items-center justify-center bg-ink/60 text-[10px] font-semibold text-white group-hover:flex"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <a
+                            href={isUploaded ? `${url}?download=1` : url}
+                            target={isUploaded ? undefined : "_blank"}
+                            rel="noreferrer"
+                            className="text-[10px] font-medium text-ink/50 underline underline-offset-2 hover:text-ink"
+                          >
+                            {isUploaded ? "Save" : "Open"}
+                          </a>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
