@@ -24,7 +24,12 @@ type PdfPage = {
 
 let loader: Promise<PdfJs> | null = null;
 
-/** Loads pdf.js once from CDN, shared across all viewers on the page. */
+/**
+ * Rendered pages are cached per PDF for the whole browser session, so
+ * navigating away and back repaints instantly instead of re-rendering.
+ */
+const pageCache = new Map<string, string[]>();
+
 function loadPdfJs(): Promise<PdfJs> {
   if (!loader) {
     loader = new Promise<PdfJs>((resolve, reject) => {
@@ -55,29 +60,65 @@ function loadPdfJs(): Promise<PdfJs> {
   return loader;
 }
 
+function canvasToUrl(canvas: HTMLCanvasElement): Promise<string> {
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => resolve(blob ? URL.createObjectURL(blob) : canvas.toDataURL("image/jpeg", 0.85)),
+      "image/jpeg",
+      0.85,
+    );
+  });
+}
+
+function appendPageImage(host: HTMLDivElement, src: string, pageNumber: number) {
+  const image = document.createElement("img");
+  image.src = src;
+  image.alt = `Page ${pageNumber}`;
+  image.style.width = "100%";
+  image.style.height = "auto";
+  image.style.display = "block";
+  image.setAttribute("data-protect", "");
+  image.setAttribute("loading", "lazy");
+  image.setAttribute("decoding", "async");
+  if (pageNumber > 1) image.style.borderTop = "1px solid rgba(255,255,255,0.08)";
+  host.appendChild(image);
+}
+
 /**
  * Renders every page of a PDF as a full-width image — like Behance spreads.
- * Works on phones too, where iframe-embedded PDFs show nothing.
+ * First page appears as soon as it is ready; revisits paint from cache.
  */
 export function PdfPages({ url, title }: { url: string; title: string }) {
   const container = useRef<HTMLDivElement | null>(null);
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [pageCount, setPageCount] = useState(0);
+  const [state, setState] = useState<"loading" | "ready" | "error">(
+    pageCache.has(url) ? "ready" : "loading",
+  );
 
   useEffect(() => {
     let cancelled = false;
+    const host = container.current;
+    if (!host) return;
+
+    // Instant repaint from cache on revisit.
+    const cached = pageCache.get(url);
+    if (cached?.length) {
+      host.innerHTML = "";
+      cached.forEach((src, index) => appendPageImage(host, src, index + 1));
+      setState("ready");
+      return;
+    }
 
     async function render() {
       try {
         const pdfjs = await loadPdfJs();
         const doc = await pdfjs.getDocument(url).promise;
         if (cancelled || !container.current) return;
-        setPageCount(doc.numPages);
 
-        const host = container.current;
-        host.innerHTML = "";
-        const width = host.clientWidth || 800;
+        const target = container.current;
+        target.innerHTML = "";
+        const width = target.clientWidth || target.parentElement?.clientWidth || 800;
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const rendered: string[] = [];
 
         for (let n = 1; n <= doc.numPages; n += 1) {
           if (cancelled) return;
@@ -89,21 +130,23 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
           const canvas = document.createElement("canvas");
           canvas.width = viewport.width;
           canvas.height = viewport.height;
-          canvas.style.width = "100%";
-          canvas.style.height = "auto";
-          canvas.style.display = "block";
-          canvas.setAttribute("data-protect", "");
-          if (n > 1) canvas.style.borderTop = "1px solid rgba(255,255,255,0.08)";
-
           const context = canvas.getContext("2d");
           if (!context) continue;
-          host.appendChild(canvas);
           await page.render({ canvasContext: context, viewport }).promise;
+
+          const src = await canvasToUrl(canvas);
+          rendered.push(src);
+          if (cancelled) return;
+          appendPageImage(target, src, n);
+
+          // Reveal the stream as soon as the first page is painted.
+          if (n === 1) setState("ready");
         }
 
+        pageCache.set(url, rendered);
         if (!cancelled) setState("ready");
       } catch {
-        if (!cancelled) setState("error");
+        if (!cancelled && !pageCache.has(url)) setState("error");
       }
     }
 
@@ -121,7 +164,12 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
         </span>
         <p className="text-sm text-white/60">
           The document preview could not load here —{" "}
-          <a href={url} target="_blank" rel="noreferrer" className="font-semibold text-white underline underline-offset-4">
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-white underline underline-offset-4"
+          >
             open it directly
           </a>
           .
@@ -138,7 +186,7 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
           <p className="text-xs text-white/40">Loading {title}…</p>
         </div>
       ) : null}
-      <div ref={container} aria-label={`${title} — ${pageCount} pages`} />
+      <div ref={container} aria-label={`${title} — document pages`} />
     </div>
   );
 }
