@@ -29,6 +29,19 @@ export default async function ProjectPage({ params }: Params) {
 
   return (
     <article className="pb-16">
+      {/* Floating back button — reachable however far you scroll. */}
+      <Link
+        href="/work"
+        aria-label="Back to all work"
+        className="group fixed bottom-6 left-5 z-40 inline-flex h-12 items-center gap-2.5 rounded-full border border-white/15 bg-black/70 px-5 text-[13px] font-semibold text-white shadow-lift backdrop-blur-xl transition-all hover:border-white/40 hover:bg-black/90 md:left-8"
+      >
+        <Icon
+          name="chevron-right"
+          className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-0.5"
+        />
+        Back
+      </Link>
+
       <section className="relative overflow-hidden bg-black pb-24 pt-36 md:pb-32 md:pt-44">
         <div className="pointer-events-none absolute -left-24 top-0 h-[28rem] w-[28rem] rounded-full bg-vermilion/20 blur-[130px] animate-aurora" />
         <div className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-azure/20 blur-[120px] animate-aurora-2" />
