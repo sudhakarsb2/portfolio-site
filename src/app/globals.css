@@ -334,6 +334,32 @@ svg .animate-float {
   background: transparent;
 }
 
+/* ───────── Content protection (public site only) ───────── */
+
+/* Images and videos on the public site cannot be dragged to the desktop. */
+.dark-site img,
+.dark-site video,
+.dark-site svg {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Printing the public site yields a notice instead of the work. */
+@media print {
+  body:has(.dark-site) * {
+    display: none !important;
+  }
+
+  body:has(.dark-site)::after {
+    content: "This portfolio is protected. Please contact Sudhakar Bhambade for materials.";
+    display: block !important;
+    padding: 4rem 2rem;
+    font-family: system-ui, sans-serif;
+    font-size: 14pt;
+    color: #000;
+  }
+}
+
 
 /* ───────── Dark, Apple-style public site scope ───────── */
 .dark-site {
