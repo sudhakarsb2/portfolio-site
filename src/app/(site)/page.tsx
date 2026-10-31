@@ -3,14 +3,12 @@ import { Artwork } from "@/components/artwork";
 import { HeroPortrait } from "@/components/site/hero-portrait";
 import { HoldButton } from "@/components/site/hold-button";
 import { ProjectCard } from "@/components/site/project-card";
-import { RolloutStage } from "@/components/site/rollout-stage";
 import { Spotlight } from "@/components/site/spotlight";
 import { WordCycler } from "@/components/site/word-cycler";
 import { Icon, type IconName } from "@/components/ui/icons";
 import { Counter, Reveal } from "@/components/ui/reveal";
 import { flattenSkills } from "@/lib/utils";
 import {
-  getCategories,
   getExperiences,
   getPublishedProjects,
   getServices,
@@ -37,13 +35,12 @@ const list = (value?: string) =>
     .filter(Boolean);
 
 export default async function HomePage() {
-  const [projects, services, testimonials, experiences, settings, categories] = await Promise.all([
+  const [projects, services, testimonials, experiences, settings] = await Promise.all([
     getPublishedProjects(),
     getServices(),
     getTestimonials(),
     getExperiences(),
     getSettings(),
-    getCategories(),
   ]);
 
   const name = settings.designerName ?? "Sudhakar Bhambade";
@@ -169,35 +166,8 @@ export default async function HomePage() {
         ) : null}
       </Spotlight>
 
-      {/* ───────── ROLLOUT MACHINE ───────── */}
-      <section className="shell py-28 md:py-36">
-        <Reveal className="mx-auto max-w-3xl text-center">
-          <p className="micro text-white/40">The craft</p>
-          <h2 className="mt-5 text-[clamp(2.4rem,6vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-white">
-            One idea.{" "}
-            <span className="bg-gradient-to-r from-azure via-violet to-vermilion bg-clip-text text-transparent">
-              Every touchpoint.
-            </span>
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-white/55">
-            One key visual, carried across out-of-home, point of sale, packaging and digital —
-            without losing the idea along the way.
-          </p>
-        </Reveal>
-        <Reveal delay={120} className="mt-14">
-          <RolloutStage
-            categories={categories.map((category) => ({
-              id: category.id,
-              name: category.name,
-              description: category.description,
-              color: category.color,
-            }))}
-          />
-        </Reveal>
-      </section>
-
       {/* ───────── SELECTED WORK + LOCKED ARCHIVE ───────── */}
-      <section className="shell pb-28 md:pb-36">
+      <section className="shell py-28 md:py-36">
         <Reveal className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="micro text-white/40">Selected rollouts</p>
@@ -216,15 +186,9 @@ export default async function HomePage() {
           </Link>
         </Reveal>
 
-        <div className="mt-14 grid gap-x-6 gap-y-14 lg:grid-cols-12">
-          {shown.slice(0, 2).map((project, index) => (
-            <Reveal key={project.id} delay={index * 110} className={index === 0 ? "lg:col-span-7" : "lg:col-span-5"}>
-              <ProjectCard project={cardData(project)} aspect="aspect-[4/5] lg:aspect-[6/5]" />
-            </Reveal>
-          ))}
-
-          {shown.slice(2, 5).map((project, index) => (
-            <Reveal key={project.id} delay={index * 110} className="lg:col-span-4">
+        <div className="mt-14 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((project, index) => (
+            <Reveal key={project.id} delay={(index % 3) * 110}>
               <ProjectCard project={cardData(project)} />
             </Reveal>
           ))}
