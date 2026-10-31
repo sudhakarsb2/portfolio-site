@@ -58,6 +58,13 @@
   h3 {
     text-wrap: balance;
   }
+
+  p,
+  li,
+  blockquote,
+  dd {
+    text-wrap: pretty;
+  }
 }
 
 @layer components {
