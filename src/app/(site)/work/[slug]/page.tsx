@@ -74,7 +74,7 @@ export default async function ProjectPage({ params }: Params) {
                   </span>
                 ) : null}
               </div>
-              <h1 className="mt-7 text-[clamp(2.8rem,7.5vw,6rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
+              <h1 className="mt-7 text-[clamp(2.4rem,6.4vw,5.1rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
                 {project.title}
               </h1>
               <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-white/60">{project.summary}</p>
