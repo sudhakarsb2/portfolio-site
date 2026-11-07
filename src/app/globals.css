@@ -282,6 +282,20 @@ svg .animate-float {
   }
 }
 
+/* Indeterminate sweep for the PDF "Loading" bar. */
+@keyframes loading-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-loading-sweep {
+  animation: loading-sweep 1.2s ease-in-out infinite;
+}
+
 .skeleton {
   position: relative;
   overflow: hidden;
