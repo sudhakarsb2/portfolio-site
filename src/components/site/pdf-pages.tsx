@@ -117,9 +117,7 @@ function appendPageImage(host: HTMLDivElement, src: string, pageNumber: number) 
  */
 export function PdfPages({ url, title }: { url: string; title: string }) {
   const container = useRef<HTMLDivElement | null>(null);
-  const [state, setState] = useState<"loading" | "rendering" | "ready" | "error">(
-    memoryCache.has(url) ? "ready" : "loading",
-  );
+  const [state, setState] = useState<"loading" | "rendering" | "ready" | "error">("loading");
   const [progress, setProgress] = useState({ done: 0, total: 0 });
 
   useEffect(() => {
@@ -127,17 +125,29 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
     const host = container.current;
     if (!host) return;
 
+    // The Loading state always shows, even on cached repaints, so every
+    // visit communicates "content is on the way" the same way.
+    setState("loading");
+    const MIN_LOADER_MS = 450;
+    const shownAt = performance.now();
+
     const paint = (pages: string[]) => {
       host.innerHTML = "";
       pages.forEach((src, index) => appendPageImage(host, src, index + 1));
-      setState("ready");
+      const elapsed = performance.now() - shownAt;
+      const wait = Math.max(0, MIN_LOADER_MS - elapsed);
+      window.setTimeout(() => {
+        if (!cancelled) setState("ready");
+      }, wait);
     };
 
-    // Layer 1: memory (instant)
+    // Layer 1: memory (instant repaint, brief loader for consistency)
     const inMemory = memoryCache.get(url);
     if (inMemory?.length) {
       paint(inMemory);
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     async function run() {
@@ -217,25 +227,28 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
     );
   }
 
+  const busy = state === "loading" || state === "rendering";
+
   return (
     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#101012]" data-protect>
       {state === "loading" ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-24">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-vermilion" />
-          <p className="text-xs text-white/40">Preparing {title}…</p>
+        <div className="flex flex-col items-center justify-center py-24">
+          <p className="text-xs text-white/40">Loading</p>
+          <div className="mt-3 h-1 w-48 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full w-1/3 animate-loading-sweep rounded-full bg-vermilion" />
+          </div>
         </div>
       ) : null}
 
-      <div ref={container} aria-label={`${title} — document pages`} />
+      <div
+        ref={container}
+        aria-label={`${title} — document pages`}
+        style={state === "loading" ? { display: "none" } : undefined}
+      />
 
       {state === "rendering" ? (
         <div className="border-t border-white/10 px-6 py-4">
-          <div className="flex items-center justify-between text-xs text-white/50">
-            <span>
-              Loading pages… {progress.done} of {progress.total}
-            </span>
-            <span>{progress.total ? Math.round((progress.done / progress.total) * 100) : 0}%</span>
-          </div>
+          <p className="text-xs text-white/50">Loading</p>
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-vermilion transition-all duration-300"
@@ -244,6 +257,10 @@ export function PdfPages({ url, title }: { url: string; title: string }) {
           </div>
         </div>
       ) : null}
+
+      <span className="sr-only" aria-live="polite">
+        {busy ? "Document is loading" : "Document loaded"}
+      </span>
     </div>
   );
 }
