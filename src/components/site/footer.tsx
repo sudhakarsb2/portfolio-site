@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Disclaimer } from "@/components/site/disclaimer";
 import { Logo } from "@/components/site/logo";
 import { Icon } from "@/components/ui/icons";
 import { splitHeadline } from "@/lib/utils";
@@ -119,11 +120,9 @@ export function SiteFooter({
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-6 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-6 border-t border-white/10 pt-8">
           <Logo light />
-          <p className="micro text-[10px] text-white/35">
-            © {new Date().getFullYear()} {settings.studioName ?? "Sudhakar Bhambade"}
-          </p>
+          <Disclaimer shortText={settings.disclaimerShort} fullText={settings.disclaimerFull} />
         </div>
       </div>
     </footer>
