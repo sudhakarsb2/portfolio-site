@@ -18,6 +18,8 @@ const siteFieldLabels: Record<string, { label: string; multiline?: boolean; grou
   location: { label: "Location", group: "Contact" },
   availability: { label: "Availability badge", group: "Contact" },
   relocation: { label: "Relocation badge (empty hides it)", group: "Contact" },
+  disclaimerShort: { label: "Short disclaimer (footer, every page — empty = built-in text)", multiline: true, group: "Legal" },
+  disclaimerFull: { label: "Full disclaimer popup — start a section heading with \"## \" (empty = built-in text)", multiline: true, group: "Legal" },
   responseTime: { label: "Response time note", group: "Contact" },
   linkedin: { label: "LinkedIn URL", group: "Contact" },
   holdLabel: { label: "Hero button text", group: "Pages" },
